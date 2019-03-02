@@ -5,9 +5,7 @@ var debug = require('debug')('botkit:db');
 module.exports = function(config) {
 
 
-  mongoose.connect(process.env.MONGO_URI, {
-    useMongoClient: true
-  });
+  mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true });
 
   mongoose.Promise = global.Promise;
 
@@ -19,19 +17,20 @@ module.exports = function(config) {
   });
 
 
-  var userSchema = new Schema({
-    id: {
-      type: String,
-      index: true,
-    },
-    name: String,
-    attributes: {
-      type: Object,
-      default: {},
-    },
-  })
+  // var userSchema = new Schema({
+  //   id: {
+  //     type: String,
+  //     index: true,
+  //   },
+  //   name: String,
+  //   attributes: {
+  //     type: Object,
+  //     default: {},
+  //   },
+  // })
 
-  var users = mongoose.model('user', userSchema);
+
+  // var users = mongoose.model('user', userSchema);
 
   var historySchema = new Schema({
     userId: {

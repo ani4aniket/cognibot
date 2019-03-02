@@ -7,8 +7,13 @@ var fs = require('fs');
 var hbs = require('express-hbs');
 
 
-module.exports = function(controller) {
 
+
+module.exports = function(controller) {
+    var passport = require('passport'),
+    LocalStrategy = require('passport-local'),
+    passportLocalMongoose = require('passport-local-mongoose'),
+    User = require('.././models/user');
 
     var webserver = express();
     webserver.use(bodyParser.json());
@@ -20,6 +25,19 @@ module.exports = function(controller) {
     webserver.set('views', __dirname + '/../views/');
 
     webserver.use(express.static('public'));
+
+    webserver.use(require('express-session')({
+        secret: 'This is the secret',
+        resave: false,
+        saveUninitialized: false
+    }));
+
+    webserver.use(passport.initialize());
+    webserver.use(passport.session());
+
+    passport.use(new LocalStrategy(User.authenticate()));
+    passport.serializeUser(User.serializeUser());
+    passport.deserializeUser(User.deserializeUser());
 
     var server = http.createServer(webserver);
 

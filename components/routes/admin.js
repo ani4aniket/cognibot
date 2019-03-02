@@ -1,25 +1,43 @@
-// var passport = require('passport'),
-// 	LocalStrategy = require('passport-local'),
-// 	passportLocalMongoose = require('passport-local-mongoose'),
-// 	bodyParser = require('body-parser'),
-// 	{User} = require('../database.js')	;
-
-// webserver.use(bodyParser.urlencoded({ extended: true }));
-// webserver.use(require('express-session')({
-// 	secret: 'This is the secret',
-// 	resave: false,
-// 	saveUninitialized: false
-// }));
-
-// webserver.use(passport.initialize());
-// webserver.use(passport.session());
-
-// passport.use(new LocalStrategy(User.authenticate()));
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
 
 
 module.exports = function(webserver, controller) {
+var passport = require('passport'),
+    LocalStrategy = require('passport-local'),
+    passportLocalMongoose = require('passport-local-mongoose'),
+    User = require('../../models/user');
+
+webserver.post('/cypher', (req, res) => {
+	User.register(new User({ username: req.body.username }), req.body.password, (err, user) => {
+		if (err) {
+			console.log(err);
+			return res.render('register');
+		}
+		passport.authenticate('local')(req, res, () => {
+			res.redirect('/dashboard');
+		})
+	});
+});
+
+// Signin routes
+webserver.post('/admin', passport.authenticate('local', {
+	successRedirect: '/dashboard',
+	failureRedirect: '/admin'
+}), (req, res) => {
+
+});
+
+webserver.get('/logout', (req, res) => {
+	req.logout();
+	res.redirect('/');
+});
+
+function isLoggedIn(req, res, next) {
+	if (req.isAuthenticated()) {
+		return next();
+	}
+	res.redirect('/admin');
+};
+
 
 
 
@@ -37,42 +55,11 @@ webserver.get('/cypher', function(req, res) {
 
 });
 
-webserver.get('/dashboard', function(req, res) {
+webserver.get('/dashboard', isLoggedIn , function(req, res) {
 
 	res.render('dashboard')
 
 })
-
-// webserver.post('/cypher', (req, res) => {
-// 	User.register(new User({ username: req.body.username }), req.body.password, (err, user) => {
-// 		if (err) {
-// 			console.log(err);
-// 			return res.render('cypher');
-// 		}
-// 		passport.authenticate('local')(req, res, () => {
-// 			res.redirect('/dashboard');
-// 		})
-// 	});
-// });
-
-// webserver.post('/admin', passport.authenticate('local', {
-// 	successRedirect: '/dashboard',
-// 	failureRedirect: '/admin'
-// }), (req, res) => {
-
-// });
-
-// webserver.get('/admin/logout', (req, res) => {
-// 	req.logout();
-// 	res.redirect('/admin');
-// });
-
-// function isLoggedIn(req, res, next) {
-// 	if (req.isAuthenticated()) {
-// 		return next();
-// 	}
-// 	res.redirect('/admin');
-// };
 
 
 }
